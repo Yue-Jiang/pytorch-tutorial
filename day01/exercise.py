@@ -12,12 +12,17 @@ def creation_gallery() -> dict[str, torch.Tensor]:
     "eye4":     the 4x4 identity matrix, float32
     "sevens":   shape (2, 3) filled with 7.0, float32
     """
-    raise NotImplementedError
+    evens = torch.arange(0, 19, 2, dtype=torch.long)
+    grid = torch.linspace(0, 1, 11)
+    checker = torch.arange(1., 10., 1).reshape(3, 3) % 2
+    eye4 = torch.eye(4, dtype=torch.float32)
+    sevens = torch.full((2, 3), 7.)
+    return {'evens':evens, 'grid':grid, 'checker':checker, 'eye4':eye4, 'sevens':sevens}
 
 
 def cast_like(x: torch.Tensor, ref: torch.Tensor) -> torch.Tensor:
     """Return x converted to ref's dtype AND device (one call does both)."""
-    raise NotImplementedError
+    return x.to(ref)
 
 
 def safe_mean(x: torch.Tensor) -> torch.Tensor:
@@ -26,7 +31,7 @@ def safe_mean(x: torch.Tensor) -> torch.Tensor:
     torch.mean refuses int tensors — cast to float32 first, then mean.
     Returns a float32 scalar tensor.
     """
-    raise NotImplementedError
+    return torch.mean(x.float())
 
 
 def tensor_bytes(x: torch.Tensor) -> int:
@@ -35,4 +40,4 @@ def tensor_bytes(x: torch.Tensor) -> int:
     Compute it from x's properties (numel(), element_size()) — no
     hardcoded dtype tables.
     """
-    raise NotImplementedError
+    return x.numel() * x.element_size()
