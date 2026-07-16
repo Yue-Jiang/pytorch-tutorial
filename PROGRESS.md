@@ -1,7 +1,7 @@
 # Progress
 
 - [x] Day 1 — Tensor anatomy (2026-07-15)
-- [ ] Day 2 — Storage & strides
+- [x] Day 2 — Storage & strides (2026-07-15)
 - [ ] Day 3 — The indexing family
 - [ ] Day 4 — einsum
 - [ ] Day 5 — Reductions & elementwise
