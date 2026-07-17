@@ -80,6 +80,19 @@ consume it in a chain or rebind.
   zero-copy strided views the user-facing standard; Torch/PyTorch
   inherited. Broadcasting IS stride-0 views.
 
+## My closing theorem: slice syntax IS the triple
+
+`x[start:stop:step]` edits one note field per slot:
+`start` → offset (`offset += start·stride`), `stop` → shape
+(`ceil((stop−start)/step)` — stop never enters the note, which is why
+overshooting it is forgiven while a bad start is bounds-checked),
+`step` → stride (`stride *= step`). Verified: `arange(20)[3:15:4]` →
+shape (3,), stride (4,), offset 3, same storage. Offset's general form is
+`start·stride` (bare `start` only when that dim's stride is 1). Offset
+itself = "which box the walk starts at" — the pre-paid part of the address
+formula `box = offset + Σ index·stride`; slicing evaluates the fixed part
+once and stores it. Also: `data_ptr = storage.data_ptr + offset·element_size`.
+
 ## Carry into day 3
 
 The indexing family. Open thread from today: advanced indexing always

@@ -11,7 +11,8 @@ def my_gather(x: torch.Tensor, index: torch.Tensor) -> torch.Tensor:
     Banned: torch.gather / .gather / take_along_dim. Use advanced indexing
     with a broadcast row-index column (course #1 day 6's grid trick).
     """
-    raise NotImplementedError
+    N = x.shape[0]
+    return x[torch.arange(N).unsqueeze(1), index]
 
 
 def pick_per_row(x: torch.Tensor, cols: torch.Tensor) -> torch.Tensor:
@@ -19,7 +20,8 @@ def pick_per_row(x: torch.Tensor, cols: torch.Tensor) -> torch.Tensor:
 
     (The cross-entropy indexing move — one line.)
     """
-    raise NotImplementedError
+    N = x.shape[0]
+    return x[torch.arange(N), cols]
 
 
 def top2_mask(x: torch.Tensor) -> torch.Tensor:
@@ -29,7 +31,7 @@ def top2_mask(x: torch.Tensor) -> torch.Tensor:
     Assume no ties among each row's top values. (topk + scatter, or
     topk + comparison — your pick.)
     """
-    raise NotImplementedError
+    return x >= torch.topk(x, dim=1, k=2).values[:,[-1]]
 
 
 def histogram(ids: torch.Tensor, n_bins: int) -> torch.Tensor:
@@ -39,4 +41,5 @@ def histogram(ids: torch.Tensor, n_bins: int) -> torch.Tensor:
     Banned: torch.bincount, torch.histc, loops over ids. Use scatter_add_
     (or index_add_) into a zeros tensor.
     """
-    raise NotImplementedError
+    out = torch.zeros(n_bins, dtype=torch.int64)
+    return out.scatter_add_(dim=0, index=ids, src=torch.ones_like(ids))
