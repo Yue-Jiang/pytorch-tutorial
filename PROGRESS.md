@@ -3,7 +3,7 @@
 - [x] Day 1 — Tensor anatomy (2026-07-15)
 - [x] Day 2 — Storage & strides (2026-07-15)
 - [x] Day 3 — The indexing family (2026-07-15)
-- [ ] Day 4 — einsum
+- [x] Day 4 — einsum (2026-07-15)
 - [ ] Day 5 — Reductions & elementwise
 - [ ] Day 6 — Autograd
 - [ ] Day 7 — nn.Module system
