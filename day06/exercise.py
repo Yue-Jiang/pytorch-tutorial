@@ -10,7 +10,10 @@ def grad_of(f: Callable[[torch.Tensor], torch.Tensor], x: torch.Tensor) -> torch
     Must NOT modify the caller's x (no requires_grad flag left behind on
     it): work on a detached clone. Returns a tensor of x's shape.
     """
-    raise NotImplementedError
+    x = x.detach().clone().requires_grad_(True)
+    y = f(x)
+    y.backward()
+    return x.grad
 
 
 def numeric_grad(
@@ -24,13 +27,22 @@ def numeric_grad(
     slow reference — that's its job). Use float64 x for accuracy (the
     tests do).
     """
-    raise NotImplementedError
+    g = torch.zeros_like(x, dtype=torch.float64)
+    for i in torch.arange(x.shape[-1]):
+        xp = x.clone()
+        xp[i] = xp[i] + eps
+        xm = x.clone()
+        xm[i] = xm[i] - eps
+        g[i] = (f(xp) - f(xm)) / (2 *eps)
+    return g
+    
 
 
 def half_stopped(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     """Return (a * b_const).sum() where b_const is b treated as a CONSTANT:
     gradients must flow to a but NOT to b. (One detach, well placed.)"""
-    raise NotImplementedError
+    b_const = b.detach()
+    return (a*b_const).sum()
 
 
 class MyCube(torch.autograd.Function):
@@ -42,8 +54,10 @@ class MyCube(torch.autograd.Function):
 
     @staticmethod
     def forward(ctx, x: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError
+        ctx.save_for_backward(x)
+        return x**3
 
     @staticmethod
     def backward(ctx, grad_out: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError
+        (x,) = ctx.saved_tensors
+        return grad_out * 3 * x**2

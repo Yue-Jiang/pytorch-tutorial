@@ -38,6 +38,16 @@ class TestNumericGrad:
         assert not torch.allclose(num, 3 * x, atol=1e-2), \
             "numeric_grad should disagree with a wrong analytic formula"
 
+    def test_coupled_function(self):
+        # f with cross-terms: the probe must be the FULL vector with one
+        # entry nudged (x + eps*e_i), not the lone coordinate. A
+        # separable-only implementation fails here.
+        x = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
+        f = lambda t: (t.sum()) ** 2
+        num = exercise.numeric_grad(f, x)
+        want = torch.full_like(x, 2 * x.sum().item())   # 2*sum(x) everywhere
+        torch.testing.assert_close(num, want, atol=1e-4, rtol=1e-4)
+
 
 class TestDetachSemantics:
     def test_grad_flows_to_a_only(self):
