@@ -17,7 +17,11 @@ class MyDropout(nn.Module):
         self.p = p
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError
+        if not self.training:
+            return x
+        probs = torch.full_like(x, self.p)
+        mask = torch.bernoulli(probs).to(dtype=torch.bool)
+        return x.masked_fill(mask, 0) / (1 - self.p)
 
 
 class MyBatchNorm1d(nn.Module):
@@ -44,7 +48,19 @@ class MyBatchNorm1d(nn.Module):
         self.eps = eps
         self.momentum = momentum
         # TODO: create weight/bias Parameters and the two buffers.
-        raise NotImplementedError
+        self.weight = nn.Parameter(torch.ones((num_features,)))
+        self.bias = nn.Parameter(torch.zeros((num_features,)))
+        self.register_buffer("running_mean", torch.zeros((num_features,)))
+        self.register_buffer("running_var", torch.ones((num_features,)))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError
+        batch_mean = x.mean(dim=0)
+        batch_var = x.var(dim=0, correction=1)
+        batch_var_biased = x.var(dim=0, keepdim=True, correction=0)
+        if self.training:
+            x = (x - batch_mean) / torch.sqrt(batch_var_biased + self.eps)
+            self.running_mean.mul_(1 - self.momentum).add_(self.momentum * batch_mean.detach())
+            self.running_var.mul_(1 - self.momentum).add_(self.momentum * batch_var.detach())
+        else:
+            x = (x - self.running_mean) / torch.sqrt(self.running_var + self.eps)
+        return x * self.weight + self.bias
