@@ -21,6 +21,7 @@ def stable_softmax(x: torch.Tensor) -> torch.Tensor:
     values — for example a row like [10000, 9999] — without producing
     infinities or NaNs.
     """
+    x = x - x.amax(dim=-1, keepdim=True)
     e = torch.exp(x)
     return e / e.sum(dim=-1, keepdim=True)
 
@@ -36,7 +37,7 @@ def causal_scores(scores: torch.Tensor) -> torch.Tensor:
     its original value unchanged.
     """
     mask = torch.tril(torch.ones_like(scores, dtype=torch.bool))
-    return scores.masked_fill(mask, -torch.inf)
+    return scores.masked_fill(~mask, -torch.inf)
 
 
 def merge_heads(y: torch.Tensor) -> torch.Tensor:
@@ -48,7 +49,7 @@ def merge_heads(y: torch.Tensor) -> torch.Tensor:
     laid side by side — the merge step from course #1, day 4.
     """
     B, H, T, Dh = y.shape
-    return y.transpose(1, 2).view(B, T, H * Dh)
+    return y.transpose(1, 2).contiguous().view(B, T, H * Dh)
 
 
 def standardize_rows(x: torch.Tensor) -> torch.Tensor:
@@ -58,8 +59,8 @@ def standardize_rows(x: torch.Tensor) -> torch.Tensor:
     mean zero and standard deviation one, where the standard deviation
     is the biased one (computed with correction=0).
     """
-    mean = x.mean(dim=0, keepdim=True)
-    std = x.std(dim=0, keepdim=True, correction=0)
+    mean = x.mean(dim=1, keepdim=True)
+    std = x.std(dim=1, keepdim=True, correction=0)
     return (x - mean) / std
 
 
@@ -72,7 +73,8 @@ def sgd_update(p: torch.Tensor, lr: float) -> None:
     the same tensor object (no rebinding, no copy), and must leave
     p.requires_grad set to True. It returns nothing.
     """
-    p -= lr * p.grad
+    with torch.no_grad():
+        p -= lr * p.grad
 
 
 def sequence_loss(logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
@@ -84,5 +86,5 @@ def sequence_loss(logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
     the correct class index for each row. Return the mean loss as a
     scalar tensor.
     """
-    probs = torch.softmax(logits, dim=-1)
-    return F.cross_entropy(probs, targets)
+    # probs = torch.softmax(logits, dim=-1)
+    return F.cross_entropy(logits, targets)

@@ -9,4 +9,4 @@
 - [x] Day 7 — nn.Module system (2026-07-15)
 - [x] Day 8 — Data & optim machinery (2026-07-20)
 - [x] Day 9 — Devices & performance (2026-07-20)
-- [ ] Day 10 — Capstone: bug forensics
+- [x] Day 10 — Capstone: bug forensics (2026-07-20) 🎓 six diagnoses, six repairs
