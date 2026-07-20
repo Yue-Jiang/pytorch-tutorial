@@ -8,5 +8,5 @@
 - [x] Day 6 — Autograd (2026-07-15)
 - [x] Day 7 — nn.Module system (2026-07-15)
 - [x] Day 8 — Data & optim machinery (2026-07-20)
-- [ ] Day 9 — Devices & performance
+- [x] Day 9 — Devices & performance (2026-07-20)
 - [ ] Day 10 — Capstone: bug forensics
